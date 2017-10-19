@@ -13,12 +13,13 @@ RUN apt-get update && apt-get install -y wget --no-install-recommends \
     && apt-get purge --auto-remove -y curl \
     && rm -rf /src/*.deb
 
-
-COPY startup.sh api.js cache.js crawler.js package.json utils.js yarn.lock /api/
+COPY package.json yarn.lock /api/
 WORKDIR /api/
 RUN yarn
 RUN npm install -g pm2
 
-EXPOSE 8081
+COPY process.yml startup.sh api.js cache.js crawler.js utils.js /api/
+RUN chmod +x ./startup.sh
 
-CMD ["./startup.sh"]
+EXPOSE 8081
+CMD ["pm2-docker", "process.yml"]
