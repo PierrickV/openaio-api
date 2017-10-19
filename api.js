@@ -16,7 +16,12 @@ app.use(function(req, res, next) {
 });
 
 async function get (url) {
-  const data = await request(url);
+  const data = await request({
+    url,
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.45 Safari/535.19',
+    }
+  });
   return cheerio.load(data);
 }
 
@@ -68,7 +73,7 @@ async function getProducts(url) {
 const getProductsCached = cached(getProducts, 10);
 const getDropsCached = cached(getDropList, 10);
 const getCategoriesCached = cached(getSupremeCategories, 0.15);
-const getSupremeProductsCached = cached(getSupremeProducts, 0.10);
+const getSupremeProductsCached = cached(getSupremeProducts, 0.12);
 
 app.get('/stock', async (req, res) => {
   const categories = await getCategoriesCached();
