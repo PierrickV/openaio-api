@@ -18,6 +18,7 @@ app.use(function(req, res, next) {
 async function get (url) {
   const data = await request({
     url,
+    timeout: 3000,
     headers: {
       'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.45 Safari/535.19',
     }
