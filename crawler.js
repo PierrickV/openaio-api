@@ -8,7 +8,7 @@ function sleep(ms) {
 }
 
 async function fetchStock(page) {
-  await page.goto('https://supremenewyork.com/shop/all');
+  await page.goto('https://supremenewyork.com/shop/all', { waitUntil: 'load', timeout: 3000 });
   const categories = await page.evaluate(() => {
     return Array.from(document.querySelectorAll('#nav-categories li a')).map(x => ({ name: x.innerText, url: x.href }))
       .filter(x => ['new', 'all'].indexOf(x.name) === -1);
@@ -16,6 +16,7 @@ async function fetchStock(page) {
   const wantedCompletionSeconds = 6;
   const timeout = (wantedCompletionSeconds / categories.length) * 1000;
   const allProducts = [];
+  const now = new Date();
   for (let category of categories) {
     await page.goto(category.url, { waitUntil: 'load', timeout: 3000 });
     let products = await page.evaluate(() => {
@@ -25,6 +26,7 @@ async function fetchStock(page) {
         color: x.querySelector('p').innerText,
         soldOut: x.querySelector('.sold_out_tag') !== null,
         imageUrl: x.querySelector('img').src,
+        timestamp: now.getTime(),
       }));
     });
     products = products.map(x => Object.assign(x, { category: category.name }));
@@ -51,7 +53,7 @@ async function loop(browser, page, cancellationToken = {}) {
 }
 
 async function run() {
-  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
   await loop(browser, page);
 }
