@@ -34,23 +34,28 @@ async function fetchStock(page) {
   return allProducts;
 }
 
-async function loop(page, cancellationToken = {}) {
+async function loop(browser, page, cancellationToken = {}) {
   try {
     const products = await fetchStock(page);
     fs.writeFileSync('stock.json', JSON.stringify(products));
     console.log('New products fetched successfully');
+    if (!cancellationToken.cancel) {
+      await loop(browser, page);
+    }
   } catch (e) {
     console.error('Error while fetching products');
     console.error(e);
-  } finally {
-    if (!cancellationToken.cancel) {
-      await loop(page);
-    }
+    await browser.close();
+    await run();
   }
 }
 
-(async () => {
-  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+async function run() {
+  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
-  await loop(page);
+  await loop(browser, page);
+}
+
+(async () => {
+  await run();
 })();
