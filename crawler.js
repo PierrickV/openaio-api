@@ -16,10 +16,10 @@ async function fetchStock(page) {
   const wantedCompletionSeconds = 6;
   const timeout = (wantedCompletionSeconds / categories.length) * 1000;
   const allProducts = [];
-  const now = new Date();
   for (let category of categories) {
     await page.goto(category.url, { waitUntil: 'load', timeout: 3000 });
     let products = await page.evaluate(() => {
+      const now = new Date();
       return Array.from(document.querySelectorAll('article')).map((x) => ({
         url: x.querySelector('a').href,
         name: x.querySelector('h1').innerText,
