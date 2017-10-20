@@ -17,6 +17,8 @@ async function fetchStock(page) {
   });
   const wantedCompletionSeconds = 4;
   const timeout = (wantedCompletionSeconds / categories.length) * 1000;
+  const prev = new Date();
+
   const allProducts = [];
   for (let category of categories) {
     await page.goto(category.url, pageSettings);
@@ -31,9 +33,12 @@ async function fetchStock(page) {
         timestamp: now.getTime(),
       }));
     });
+
+    const now = new Date();
+    const diff = (now.getTime() - prev.getTime());
     products = products.map(x => Object.assign(x, { category: category.name }));
     allProducts.push(...products);
-    await sleep(timeout);
+    await sleep(Math.min(0, timeout - diff));
   }
   return allProducts;
 }
