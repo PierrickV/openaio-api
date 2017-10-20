@@ -1,6 +1,8 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
+const pageSettings = { waitUntil: 'load', timeout: 3000 };
+
 function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -8,16 +10,16 @@ function sleep(ms) {
 }
 
 async function fetchStock(page) {
-  await page.goto('https://supremenewyork.com/shop/all', { waitUntil: 'load', timeout: 3000 });
+  await page.goto('https://supremenewyork.com/shop/all', pageSettings);
   const categories = await page.evaluate(() => {
     return Array.from(document.querySelectorAll('#nav-categories li a')).map(x => ({ name: x.innerText, url: x.href }))
       .filter(x => ['new', 'all'].indexOf(x.name) === -1);
   });
-  const wantedCompletionSeconds = 6;
+  const wantedCompletionSeconds = 4;
   const timeout = (wantedCompletionSeconds / categories.length) * 1000;
   const allProducts = [];
   for (let category of categories) {
-    await page.goto(category.url, { waitUntil: 'load', timeout: 3000 });
+    await page.goto(category.url, pageSettings);
     let products = await page.evaluate(() => {
       const now = new Date();
       return Array.from(document.querySelectorAll('article')).map((x) => ({
@@ -55,6 +57,14 @@ async function loop(browser, page, cancellationToken = {}) {
 async function run() {
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
+  await page.setRequestInterceptionEnabled(true);
+  page.on('request', (request) => {
+    if (/\.(png|jpg|jpeg|gif|webp)$/i.test(request.url)) {
+      request.abort();
+    } else {
+      request.continue();
+    }
+  });
   await loop(browser, page);
 }
 

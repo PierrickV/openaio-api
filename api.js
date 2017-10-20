@@ -57,7 +57,7 @@ function getSupremeProducts(raw = false) {
 
 const getProductsCached = cached(getProducts, 10);
 const getDropsCached = cached(getDropList, 10);
-const getSupremeProductsCached = cached(getSupremeProducts, 0.11);
+const getSupremeProductsCached = cached(getSupremeProducts, 0.6);
 
 app.get('/stock', (req, res) => {
   res.json(getSupremeProductsCached());
