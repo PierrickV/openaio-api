@@ -38,7 +38,7 @@ async function fetchStock(page) {
     const diff = (now.getTime() - prev.getTime());
     products = products.map(x => Object.assign(x, { category: category.name }));
     allProducts.push(...products);
-    await sleep(Math.min(0, timeout - diff));
+    await sleep(Math.max(0, timeout - diff));
   }
   return allProducts;
 }
