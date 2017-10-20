@@ -13,5 +13,7 @@ RUN git clone --depth=1 https://github.com/val92130/openaio-api.git \
     && yarn \
     && npm install -g pm2
 
+WORKDIR openaio-api
+
 EXPOSE 8081
 CMD ["pm2-docker", "process.yml"]
